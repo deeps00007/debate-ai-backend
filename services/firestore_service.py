@@ -87,7 +87,7 @@ class FirestoreService:
             "last_debate_date": today,
         })
 
-    def create_debate(self, user_id: str, topic: str, difficulty: str, language: str = "en-IN") -> str:
+    def create_debate(self, user_id: str, topic: str, difficulty: str, language: str = "en-IN", voice: str = "shubh") -> str:
         debate_id = _store._next_id() if DEV_MODE else self.db().collection("debates").document().id
 
         if DEV_MODE:
@@ -96,6 +96,7 @@ class FirestoreService:
                 "topic": topic,
                 "difficulty": difficulty,
                 "language": language,
+                "voice": voice,
                 "status": "active",
                 "turn_count": 0,
                 "created_at": datetime.now(timezone.utc),
@@ -109,6 +110,7 @@ class FirestoreService:
             "topic": topic,
             "difficulty": difficulty,
             "language": language,
+            "voice": voice,
             "status": "active",
             "turn_count": 0,
             "created_at": datetime.now(timezone.utc),

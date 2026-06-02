@@ -68,8 +68,10 @@ class SarvamClient:
             "target_language_code": language_code,
             "speaker": speaker or settings.sarvam_tts_speaker,
             "model": model,
-            "pace": 0.9,
+            "pace": 0.85,
+            "temperature": 0.6,
             "speech_sample_rate": 24000,
+            "output_audio_codec": "mp3",
         }
         async with httpx.AsyncClient(timeout=15) as client:
             response = await client.post(
