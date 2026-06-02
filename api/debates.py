@@ -17,6 +17,7 @@ sarvam_client = SarvamClient()
 class CreateDebateRequest(BaseModel):
     topic: str
     difficulty: str
+    language: str = "en-IN"
 
 
 @router.post("")
@@ -37,6 +38,7 @@ async def create_debate(
         user_id=user_id,
         topic=body.topic,
         difficulty=body.difficulty,
+        language=body.language,
     )
     await asyncio.to_thread(firestore_service.increment_debate_count, user_id)
     return {"debate_id": debate_id}
@@ -62,12 +64,15 @@ async def submit_turn(
             detail="Maximum debate turns reached. Please end the debate.",
         )
 
+    language = debate.get("language", "en-IN")
+
     try:
         audio_bytes = await audio.read()
         if len(audio_bytes) > settings.max_audio_size_mb * 1024 * 1024:
             raise HTTPException(status_code=413, detail="Audio file too large")
 
-        user_transcript = await sarvam_client.speech_to_text(audio_bytes)
+        stt_lang = "hi-IN" if language in ("hi-IN", "hi") else "en-IN"
+        user_transcript = await sarvam_client.speech_to_text(audio_bytes, language_code=stt_lang)
 
         if not user_transcript.strip():
             raise HTTPException(status_code=400, detail="No speech detected. Please try speaking again.")
@@ -95,12 +100,15 @@ async def submit_turn(
             topic=debate["topic"],
             difficulty=debate["difficulty"],
             history=history,
+            language=language,
         )
 
         ai_text = await sarvam_client.chat_completion(messages, max_tokens=1536)
 
+        tts_lang = "hi-IN" if language in ("hi-IN", "hi") else "en-IN"
+        tts_speaker = "shubh"
         tts_text = ai_text[:2500]
-        ai_audio_bytes = await sarvam_client.text_to_speech(tts_text)
+        ai_audio_bytes = await sarvam_client.text_to_speech(tts_text, speaker=tts_speaker, language_code=tts_lang)
         ai_audio_base64 = base64.b64encode(ai_audio_bytes).decode("utf-8")
 
         await asyncio.to_thread(

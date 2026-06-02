@@ -60,10 +60,18 @@ Your debate style for ADVANCED:
 """
 
 
+LANGUAGE_PROMPTS = {
+    "en-IN": "You MUST respond in English only.",
+    "hi-IN": "You MUST respond in Hinglish - a natural mix of Hindi and English. Use both languages freely like Indians speak in real conversations. Example: 'Haan, I see your point lekin have you thought about the rural areas mein internet ki problem?'",
+    "hi": "You MUST respond in pure Hindi. Use Hindi script (Devanagari) only. No English words. Act like a Hindi news channel debater. Example: 'आपकी बात तो सही है, लेकिन क्या आपने ग्रामीण इलाकों में इंटरनेट की समस्या के बारे में सोचा है?'",
+}
+
+
 def build_debate_prompt(
     topic: str,
     difficulty: str,
     history: list[dict],
+    language: str = "en-IN",
 ) -> list[dict]:
     if difficulty == "beginner":
         system_prompt = BEGINNER_SYSTEM_PROMPT
@@ -73,6 +81,8 @@ def build_debate_prompt(
         system_prompt = INTERMEDIATE_SYSTEM_PROMPT
 
     system_prompt += f"\n\nThe current debate topic is: {topic}"
+    lang_instruction = LANGUAGE_PROMPTS.get(language, LANGUAGE_PROMPTS["en-IN"])
+    system_prompt += f"\n\n{lang_instruction}"
     system_prompt += "\n\nRemember: respond in 2-4 sentences maximum. Use Indian context. Be natural."
 
     messages = [{"role": "system", "content": system_prompt}]
