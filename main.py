@@ -31,6 +31,19 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(debates_router, prefix="/debates", tags=["debates"])
 
 
+@app.get("/")
+async def root():
+    return {
+        "name": "Debate AI Coach API",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "debates": "/debates",
+            "docs": "/docs",
+        },
+    }
+
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
