@@ -61,6 +61,7 @@ class SarvamClient:
         text: str,
         speaker: Optional[str] = None,
         language_code: str = "en-IN",
+        pace: float = 1.0,
     ) -> bytes:
         model = settings.sarvam_tts_model
         payload = {
@@ -68,7 +69,7 @@ class SarvamClient:
             "target_language_code": language_code,
             "speaker": speaker or settings.sarvam_tts_speaker,
             "model": model,
-            "pace": 0.85,
+            "pace": pace,
             "temperature": 0.6,
             "speech_sample_rate": 24000,
             "output_audio_codec": "mp3",

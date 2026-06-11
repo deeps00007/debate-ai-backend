@@ -19,6 +19,7 @@ class CreateDebateRequest(BaseModel):
     difficulty: str
     language: str = "en-IN"
     voice: str = "shubh"
+    speech_speed: float = 1.0
 
 
 @router.post("")
@@ -41,6 +42,7 @@ async def create_debate(
         difficulty=body.difficulty,
         language=body.language,
         voice=body.voice,
+        speech_speed=body.speech_speed,
     )
     await asyncio.to_thread(firestore_service.increment_debate_count, user_id)
     return {"debate_id": debate_id}
@@ -109,8 +111,11 @@ async def submit_turn(
 
         tts_lang = "hi-IN" if language in ("hi-IN", "hi") else "en-IN"
         tts_speaker = debate.get("voice", "shubh")
+        tts_pace = debate.get("speech_speed", 1.0)
         tts_text = ai_text[:2500]
-        ai_audio_bytes = await sarvam_client.text_to_speech(tts_text, speaker=tts_speaker, language_code=tts_lang)
+        ai_audio_bytes = await sarvam_client.text_to_speech(
+            tts_text, speaker=tts_speaker, language_code=tts_lang, pace=tts_pace,
+        )
         ai_audio_base64 = base64.b64encode(ai_audio_bytes).decode("utf-8")
 
         await asyncio.to_thread(

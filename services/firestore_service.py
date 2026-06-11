@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict
 from config import settings
@@ -13,11 +14,9 @@ class _MemoryStore:
         self.debates = {}
         self.messages = {}
         self.feedback = {}
-        self._counter = 0
 
     def _next_id(self):
-        self._counter += 1
-        return f"dev-id-{self._counter}"
+        return f"dev-{uuid.uuid4().hex[:12]}"
 
 
 _store = _MemoryStore()
@@ -87,7 +86,7 @@ class FirestoreService:
             "last_debate_date": today,
         })
 
-    def create_debate(self, user_id: str, topic: str, difficulty: str, language: str = "en-IN", voice: str = "shubh") -> str:
+    def create_debate(self, user_id: str, topic: str, difficulty: str, language: str = "en-IN", voice: str = "shubh", speech_speed: float = 1.0) -> str:
         debate_id = _store._next_id() if DEV_MODE else self.db().collection("debates").document().id
 
         if DEV_MODE:
@@ -97,6 +96,7 @@ class FirestoreService:
                 "difficulty": difficulty,
                 "language": language,
                 "voice": voice,
+                "speech_speed": speech_speed,
                 "status": "active",
                 "turn_count": 0,
                 "created_at": datetime.now(timezone.utc),
@@ -111,6 +111,7 @@ class FirestoreService:
             "difficulty": difficulty,
             "language": language,
             "voice": voice,
+            "speech_speed": speech_speed,
             "status": "active",
             "turn_count": 0,
             "created_at": datetime.now(timezone.utc),
